@@ -1,30 +1,14 @@
 #!/bin/bash
+# Update package repository and install Apache
+yum update -y
+yum install -y httpd
 
-# Wait until any other yum process finishes
-while fuser /var/lib/rpm/.rpm.lock; do
-  echo "Waiting for other yum process to complete..."
-  sleep 5
-done
+# Start Apache service and enable it to start on boot
+systemctl start httpd
+systemctl enable httpd
 
-# Update yum and install apache
-sudo yum update -y
-sudo yum install -y httpd
+# Create a simple HTML page
+echo "<html><body><h1>Welcome to the Apache Web Server on EC2!</h1></body></html>" > /var/www/html/index.html
 
-# Enable and start apache
-sudo systemctl enable httpd
-sudo systemctl start httpd
-
-# Check if Apache is running
-if ! systemctl status httpd | grep "running"; then
-  echo "Apache installation failed"
-  exit 1
-fi
-
-# Ensure the web directory exists and create index.html
-sudo mkdir -p /var/www/html
-echo "<html><body><h1>Hello from $(hostname -f)</h1></body></html>" > /var/www/html/index.html
-
-# Restart Apache to load the index.html page
-sudo systemctl restart httpd
-
-echo "Apache Web Server setup complete"
+# Ensure Apache is running
+systemctl status httpd
